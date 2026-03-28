@@ -15,7 +15,7 @@ An educational, local clinical reasoning trainer designed for nurse practitioner
 ## Setup Instructions
 
 1. **Install Dependencies**
-   Ensure you have Python 3.9+ installed. Create a virtual environment and install the requirements:
+   Ensure you have Python 3.12 installed. Create a virtual environment and install the requirements:
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
