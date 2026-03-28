@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="dashboard">
+    <h2>Welcome to NP Case Trainer</h2>
+    <p>A structured case-based learning environment for clinical reasoning, assessment building, and documentation practice.</p>
+
+    <div class="actions">
+        <a href="/cases" class="btn">View Case Library</a>
+        <a href="/cases/import" class="btn btn-secondary">Import New Case (JSON)</a>
+    </div>
+</section>
+
+<section class="info-panel">
+    <h3>System Status</h3>
+    <p>Database Initialized. Total cases loaded: <strong>{{ case_count }}</strong></p>
+</section>
+
+<section class="info-panel" style="margin-top: 1.5rem;">
+    <h3>About This Tool</h3>
+    <p>This local application allows you to load case studies, review patient data in stages, and draft model SOAP notes and differential diagnoses. Work progress is saved locally.</p>
+</section>
+{% endblock %}
