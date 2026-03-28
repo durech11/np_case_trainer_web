@@ -1,1 +1,0 @@
-# OBSOLETE: Moved to app/models/
