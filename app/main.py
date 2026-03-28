@@ -30,7 +30,8 @@ def health_check():
 def read_root(request: Request, session: Session = Depends(get_session)):
     # Test DB query to verify initialization works
     cases = session.exec(select(CaseStudy)).all()
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "case_count": len(cases)
-    })
+    return templates.TemplateResponse(
+        request=request, 
+        name="index.html", 
+        context={"case_count": len(cases)}
+    )
