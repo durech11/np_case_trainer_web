@@ -9,13 +9,19 @@
 </div>
 
 {% if cases %}
+<div style="margin-bottom: 1rem; color: var(--secondary-color);">
+    Showing {{ case_count }} case{% if case_count != 1 %}s{% endif %}
+</div>
 <div class="case-grid">
     {% for case in cases %}
     <div class="case-card">
         <h3>{{ case.title }}</h3>
         <div class="meta">
             <span><strong>Specialty:</strong> {{ case.specialty }}</span>
-            <span><strong>Difficulty:</strong> {{ case.difficulty }}/5</span>
+            <span>
+                <strong>Difficulty:</strong>
+                <span class="badge diff-{{ case.difficulty_class }}">{{ case.difficulty_label }} ({{ case.difficulty_num }}/5)</span>
+            </span>
         </div>
         <p class="summary">{{ case.summary }}</p>
 
@@ -28,7 +34,7 @@
 {% else %}
 <div class="empty-state">
     <h3>No Cases Found</h3>
-    <p>There are currently no case studies imported into the local database.</p>
+    <p>No cases available yet. Add JSON files to the cases folder and restart the app.</p>
 </div>
 {% endif %}
 {% endblock %}

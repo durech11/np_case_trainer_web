@@ -161,7 +161,8 @@ footer {
     color: var(--secondary-color);
     margin-bottom: 1rem;
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.3rem;
 }
 
 .case-card .summary {
@@ -177,4 +178,34 @@ footer {
     border: 1px solid var(--card-border);
     border-radius: 8px;
     color: var(--secondary-color);
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.diff-easy {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.diff-moderate {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.diff-hard {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+@media (prefers-color-scheme: dark) {
+    .diff-easy { background-color: #1e4620; color: #75b798; }
+    .diff-moderate { background-color: #533f03; color: #ffda6a; }
+    .diff-hard { background-color: #58151c; color: #ea868f; }
 }
