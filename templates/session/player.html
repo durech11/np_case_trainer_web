@@ -15,13 +15,13 @@
     <div class="progress-bar" style="width: {{ (session.current_stage / 5) * 100 }}%"></div>
 </div>
 
-<div class="case-player-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start;">
+<div class="case-player-layout">
 
-    <div class="case-content" style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <div class="case-content">
         <!-- STAGE 1: Demographics, Chief Complaint, HPI -->
         {% if session.current_stage >= 1 %}
         <div class="stage-section animate-fade-in">
-            <h2 class="stage-header" style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Stage 1: Presentation</h2>
+            <h2 class="stage-header">Stage 1: Presentation</h2>
 
             <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div>
@@ -47,21 +47,21 @@
         <!-- STAGE 2: History & ROS -->
         {% if session.current_stage >= 2 %}
         <div class="stage-section animate-fade-in">
-            <h2 class="stage-header" style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Stage 2: History</h2>
+            <h2 class="stage-header">Stage 2: History</h2>
 
             <div class="info-panel">
                 <h3 style="margin-top: 0;">Patient History</h3>
                 <h4>Past Medical History (PMH)</h4>
-                {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
+                {% if case.pmh %}<ul>{% for item in case.pmh %}<li><span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
                 <h4>Past Surgical History (PSH)</h4>
-                {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
+                {% if case.psh %}<ul>{% for item in case.psh %}<li><span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
                 <h4>Medications</h4>
                 {% if case.medications %}
                     <ul>
                     {% for med in case.medications %}
-                        <li>{{ med.name }} {{ med.dose }} {{ med.frequency }}</li>
+                        <li><span class="glossary-term" onclick="showGlossary('{{ med.name }}')">{{ med.name }}</span> {{ med.dose }} {{ med.frequency }}</li>
                     {% endfor %}
                     </ul>
                 {% else %}
@@ -69,7 +69,7 @@
                 {% endif %}
 
                 <h4>Allergies</h4>
-                {% if case.allergies %}<ul>{% for item in case.allergies %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
+                {% if case.allergies %}<ul>{% for item in case.allergies %}<li><span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
 
                 <h4>Family History</h4>
                 {% if case.family_history %}<ul>{% for item in case.family_history %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
@@ -94,7 +94,7 @@
         <!-- STAGE 3: Physical Exam & Vitals -->
         {% if session.current_stage >= 3 %}
         <div class="stage-section animate-fade-in">
-            <h2 class="stage-header" style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Stage 3: Physical Exam</h2>
+            <h2 class="stage-header">Stage 3: Physical Exam</h2>
 
             <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div>
@@ -124,7 +124,7 @@
         <!-- STAGE 4: Diagnostics -->
         {% if session.current_stage >= 4 %}
         <div class="stage-section animate-fade-in">
-            <h2 class="stage-header" style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Stage 4: Diagnostics</h2>
+            <h2 class="stage-header">Stage 4: Diagnostics</h2>
 
             <div class="info-panel">
                 <h3 style="margin-top: 0;">Lab Results</h3>
@@ -142,14 +142,13 @@
                             <tbody>
                                 {% for lab in case.labs %}
                                 <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
-                                    <td>{{ lab.name }}</td>
+                                    <td><span class="glossary-term" onclick="showGlossary('{{ lab.name }}')">{{ lab.name }}</span></td>
                                     <td>
-                                        {% if lab.flag %}
-                                            <span class="flag-badge flag-{{ lab.flag|lower|default('normal') }}">
+                                        {% set safe_flag = lab.flag|lower if lab.flag else 'normal' %}
+                                        {% if safe_flag != 'normal' %}
+                                            <span class="flag-badge flag-{{ safe_flag }}">
                                                 {{ lab.value }} {{ lab.unit }}
-                                                {% if lab.flag|lower != 'normal' %}
-                                                    <small>({{ lab.flag }})</small>
-                                                {% endif %}
+                                                <small>({{ lab.flag }})</small>
                                             </span>
                                         {% else %}
                                             <span>{{ lab.value }} {{ lab.unit }}</span>
@@ -171,7 +170,7 @@
                 <h3 style="margin-top: 0;">Imaging</h3>
                 {% if case.imaging %}
                     {% for study in case.imaging %}
-                        <h4>{{ study.type }}</h4>
+                        <h4><span class="glossary-term" onclick="showGlossary('{{ study.type }}')">{{ study.type }}</span></h4>
                         <p><strong>Summary:</strong> {{ study.summary }}</p>
                         <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
                     {% endfor %}
@@ -185,7 +184,7 @@
                 {% if case.red_flags %}
                     <ul>
                     {% for flag in case.red_flags %}
-                        <li>{{ flag }}</li>
+                        <li><span class="glossary-term" onclick="showGlossary('{{ flag }}')">{{ flag }}</span></li>
                     {% endfor %}
                     </ul>
                 {% else %}
@@ -198,9 +197,9 @@
         <!-- STAGE 5: Review -->
         {% if session.current_stage >= 5 %}
         <div class="stage-section animate-fade-in">
-            <h2 class="stage-header" style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">Stage 5: Case Review</h2>
-
+            <h2 class="stage-header">Stage 5: Case Review</h2>
             <div class="info-panel" style="background-color: rgba(0, 86, 179, 0.05); border: 2px solid var(--primary-color);">
+
                 <h3 style="margin-top: 0; color: var(--primary-color);">Differential Diagnosis Feedback</h3>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
@@ -211,9 +210,9 @@
                             {% for dx in session.user_differential_diagnosis %}
                                 <li style="margin-bottom: 0.5rem;">
                                     {% if dx in review.correct_matches %}
-                                        <span style="color: green;">✅</span> <strong>{{ dx }}</strong>
+                                        <span style="color: green;">✅</span> <strong><span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span></strong>
                                     {% else %}
-                                        <span style="color: gray;">➖</span> <span>{{ dx }}</span> <span style="font-size: 0.8em; color: var(--secondary-color);">(Extra)</span>
+                                        <span style="color: gray;">➖</span> <span><span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span></span> <span style="font-size: 0.8em; color: var(--secondary-color);">(Extra)</span>
                                     {% endif %}
                                 </li>
                             {% endfor %}
@@ -227,7 +226,7 @@
                         {% if review.missed_diagnoses %}
                             <ul style="color: var(--danger-color-dark); padding-left: 1.5rem;">
                             {% for dx in review.missed_diagnoses %}
-                                <li>{{ dx }}</li>
+                                <li><span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span></li>
                             {% endfor %}
                             </ul>
                         {% else %}
@@ -240,7 +239,7 @@
                 {% if case.model_differential %}
                     <ul>
                     {% for diff in case.model_differential %}
-                        <li><strong>{{ diff.diagnosis }}:</strong> {{ diff.rationale }}</li>
+                        <li><strong><span class="glossary-term" onclick="showGlossary('{{ diff.diagnosis }}')">{{ diff.diagnosis }}</span>:</strong> {{ diff.rationale }}</li>
                     {% endfor %}
                     </ul>
                 {% endif %}
@@ -275,12 +274,27 @@
 
     <!-- Right Sidebar: User Workspace -->
     <div class="workspace-sidebar">
-        <div class="info-panel sticky-panel" style="position: sticky; top: 1rem;">
+        <div class="info-panel sticky-panel">
             <h3 style="margin-top: 0;">Your Differential Diagnosis</h3>
 
             {% if session.current_stage >= 2 and session.current_stage < 5 %}
+
+                {% if suggestions %}
+                <div style="margin-bottom: 1rem;">
+                    <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.9em; color: var(--secondary-color);">Suggestions:</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% for suggestion in suggestions %}
+                            <form action="/session/{{ session.id }}/ddx/add" method="post" style="margin: 0;">
+                                <input type="hidden" name="diagnosis" value="{{ suggestion }}">
+                                <button type="submit" class="suggestion-pill">+ {{ suggestion }}</button>
+                            </form>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <form action="/session/{{ session.id }}/ddx/add" method="post" class="ddx-form" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                    <input type="text" name="diagnosis" placeholder="e.g., Stable angina, ACS, GERD" required style="flex: 1; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color);">
+                    <input type="text" name="diagnosis" placeholder="e.g., Stable angina" required style="flex: 1; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color);">
                     <button type="submit" class="btn">+</button>
                 </form>
 
@@ -288,7 +302,7 @@
                 <ul class="ddx-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
                     {% for dx in session.user_differential_diagnosis %}
                     <li style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--card-border);">
-                        <span>{{ dx }}</span>
+                        <span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span>
                         <form action="/session/{{ session.id }}/ddx/remove" method="post" style="margin: 0;">
                             <input type="hidden" name="diagnosis" value="{{ dx }}">
                             <button type="submit" style="background: none; border: none; color: var(--danger-color-dark); cursor: pointer; font-size: 1.2rem; line-height: 1;">&times;</button>
@@ -299,19 +313,22 @@
                 {% else %}
                 <p style="color: var(--secondary-color); text-align: center; margin-top: 1rem;">Your list is empty.</p>
                 {% endif %}
+
             {% elif session.current_stage == 5 %}
                 {% if session.user_differential_diagnosis %}
                 <ul class="ddx-list" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
                     {% for dx in session.user_differential_diagnosis %}
                     <li style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--card-border);">
-                        <span>{{ dx }}</span>
+                        <span>
+                            {% if dx in review.correct_matches %}✅{% else %}➖{% endif %} <span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span>
+                        </span>
                     </li>
                     {% endfor %}
                 </ul>
                 {% else %}
                 <p style="color: var(--secondary-color); text-align: center; margin-top: 1rem;">You didn't enter any diagnoses.</p>
                 {% endif %}
-                <p style="color: var(--secondary-color); font-size: 0.9em; margin-top: 1rem; text-align: center;">Editing disabled at Stage 5.</p>
+                <p style="color: var(--secondary-color); font-size: 0.9em; margin-top: 1rem; text-align: center;">Editing disabled during review.</p>
             {% else %}
                 <p style="color: var(--secondary-color);">This will become available in Stage 2.</p>
             {% endif %}

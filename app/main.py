@@ -7,7 +7,7 @@ from app.core.database import init_db, get_session, engine
 from app.models.case_study import CaseStudy
 from app.services.case_importer import import_local_cases
 
-from app.routes import cases, session
+from app.routes import cases, session, glossary
 
 # BASE_DIR is now the project root (one level up from app/)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +23,7 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 app.include_router(cases.router)
 app.include_router(session.router)
+app.include_router(glossary.router)
 
 @app.on_event("startup")
 def on_startup():

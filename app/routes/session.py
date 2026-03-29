@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlmodel import Session, select
+from sqlmodel import Session
 from pathlib import Path
 from datetime import datetime, timezone
+import random
 
-from app.core.database import get_session, engine
+from app.core.database import get_session
 from app.models.case_session import CaseStudySession
 from app.models.case_study import CaseStudy
 from app.models.schemas import CaseStudySchema
@@ -27,10 +28,31 @@ def session_player(session_id: int, request: Request, session: Session = Depends
 
     case_data = CaseStudySchema.model_validate_json(case_study.raw_json)
     
+    # Generate suggestions for DDx
+    suggestions = [dx.diagnosis for dx in case_data.model_differential]
+    distractors = [
+        "Asthma", "Pneumonia", "Costochondritis", "Pulmonary Embolism", 
+        "Panic Attack", "Aortic Dissection", "Pericarditis", "Myocarditis",
+        "Peptic Ulcer Disease", "Cholecystitis", "Pneumothorax"
+    ]
+    # Add a few random distractors
+    random.seed(session_id) # keep it consistent for the session
+    selected_distractors = random.sample(distractors, 5)
+    for d in selected_distractors:
+        if d not in suggestions:
+            suggestions.append(d)
+            
+    random.shuffle(suggestions)
+    
+    # Filter out suggestions the user has already added
+    user_dx_lower = [dx.lower() for dx in case_session.user_differential_diagnosis]
+    available_suggestions = [s for s in suggestions if s.lower() not in user_dx_lower]
+
     context = {
         "request": request,
         "session": case_session,
         "case": case_data,
+        "suggestions": available_suggestions
     }
 
     # If at the final stage, perform differential diagnosis comparison

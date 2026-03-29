@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NP Case Trainer{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 <body>
     <header>
@@ -22,12 +22,25 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Glossary Modal -->
+    <div id="glossaryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="glossaryTerm" style="margin: 0; color: var(--primary-color);">Term</h3>
+                <span class="close-btn" onclick="closeGlossary()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="glossaryDefinition">Loading...</p>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <p class="warning-text"><strong>Educational Purpose Only:</strong> This application is for training and educational purposes. It does not provide medical advice, diagnosis, or treatment.</p>
         </div>
     </footer>
 
-    <script src="/static/main.js"></script>
+    <script src="/static/main.js?v=2"></script>
 </body>
 </html>
