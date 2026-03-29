@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Case Player - NP Case Trainer{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <h2>Case Session #{{ session.id }}</h2>
+    <p>This is a placeholder for the future staged reveal case player.</p>
+
+    <div class="info-panel" style="margin-top: 2rem;">
+        <h3>Session Details</h3>
+        <ul>
+            <li><strong>Case Study ID:</strong> {{ session.case_study_id }}</li>
+            <li><strong>Status:</strong> {{ session.status }}</li>
+            <li><strong>Current Stage:</strong> {{ session.current_stage }}</li>
+            <li><strong>Started At:</strong> {{ session.started_at }}</li>
+        </ul>
+        <a href="/cases" class="btn btn-secondary" style="margin-top: 1rem; text-decoration: none;">Back to Library</a>
+    </div>
+</section>
+{% endblock %}

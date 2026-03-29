@@ -104,6 +104,7 @@ footer {
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
+    font-size: 1rem;
 }
 
 .btn-secondary {
@@ -130,4 +131,50 @@ footer {
 
 .info-panel h3 {
     margin-top: 0;
+}
+
+/* Case Grid */
+.case-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.case-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.case-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.case-card .meta {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.case-card .summary {
+    flex-grow: 1;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: var(--secondary-color);
 }

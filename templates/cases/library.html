@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Case Library - NP Case Trainer{% endblock %}
+
+{% block content %}
+<div class="library-header" style="margin-bottom: 2rem;">
+    <h2>Case Library</h2>
+    <p>Select a patient case to begin your structured clinical reasoning session.</p>
+</div>
+
+{% if cases %}
+<div class="case-grid">
+    {% for case in cases %}
+    <div class="case-card">
+        <h3>{{ case.title }}</h3>
+        <div class="meta">
+            <span><strong>Specialty:</strong> {{ case.specialty }}</span>
+            <span><strong>Difficulty:</strong> {{ case.difficulty }}/5</span>
+        </div>
+        <p class="summary">{{ case.summary }}</p>
+
+        <form action="/cases/{{ case.id }}/start" method="post" style="margin-top: auto;">
+            <button type="submit" class="btn" style="width: 100%;">Start Case</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>No Cases Found</h3>
+    <p>There are currently no case studies imported into the local database.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NP Case Trainer{% endblock %}</title>
-    <!-- HTMX for dynamic interactions without heavy frontend frameworks -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header>
         <div class="container header-content">
-            <h1>NP Case Trainer</h1>
+            <h1><a href="/" style="text-decoration: none; color: var(--primary-color);">NP Case Trainer</a></h1>
             <nav>
                 <a href="/">Dashboard</a>
-                <span style="opacity: 0.5; margin-left: 1rem; cursor: not-allowed;" title="Coming soon">Case Library</span>
+                <a href="/cases">Case Library</a>
             </nav>
         </div>
     </header>
