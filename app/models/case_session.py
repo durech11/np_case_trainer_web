@@ -6,10 +6,18 @@ class CaseStudySession(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     case_study_id: int = Field(foreign_key="casestudy.id")
     
-    status: str = Field(default="in_progress") # in_progress, completed
+    status: str = Field(default="in_progress")
     current_stage: int = Field(default=1)
     
-    # Store user's differential diagnoses as a JSON list of strings
+    # --- Clinical Reasoning Buckets ---
+    subjective_clues: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    objective_clues: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    red_flag_clues: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    differential_support_clues: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tests_to_consider: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    interventions_to_consider: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+
+    # Existing Differential feature
     user_differential_diagnosis: List[str] = Field(default_factory=list, sa_column=Column(JSON))
 
     started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

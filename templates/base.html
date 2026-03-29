@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NP Case Trainer{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <link rel="stylesheet" href="/static/style.css?v=2">
+    <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
     <header>
@@ -26,11 +26,24 @@
     <div id="glossaryModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="glossaryTerm" style="margin: 0; color: var(--primary-color);">Term</h3>
+                <div>
+                    <h3 id="glossaryTerm" style="margin: 0; color: var(--primary-color);">Term</h3>
+                    <span id="glossaryCategory" class="badge diff-moderate" style="margin-top: 0.5rem; display: none;">Category</span>
+                </div>
                 <span class="close-btn" onclick="closeGlossary()">&times;</span>
             </div>
             <div class="modal-body">
                 <p id="glossaryDefinition">Loading...</p>
+
+                <div id="glossaryInterpretationBox" style="display: none; margin-top: 1rem; padding: 0.8rem; background-color: rgba(25, 135, 84, 0.1); border-left: 4px solid #198754; border-radius: 4px;">
+                    <strong>Interpretation:</strong>
+                    <p id="glossaryInterpretation" style="margin: 0.5rem 0 0 0;"></p>
+                </div>
+
+                <div id="glossaryPearlBox" style="display: none; margin-top: 1rem; padding: 0.8rem; background-color: rgba(0, 86, 179, 0.05); border-left: 4px solid var(--primary-color); border-radius: 4px;">
+                    <strong>💡 Clinical Pearl:</strong>
+                    <p id="glossaryPearl" style="margin: 0.5rem 0 0 0;"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -41,6 +54,6 @@
         </div>
     </footer>
 
-    <script src="/static/main.js?v=2"></script>
+    <script src="/static/main.js?v=3"></script>
 </body>
 </html>
