@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Case Player - NP Case Trainer{% endblock %}
+{% block title %}Case Player: {{ case.title }}{% endblock %}
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -22,7 +22,7 @@
         <div>
             <h3 style="margin-top: 0;">Vital Signs</h3>
             <p><strong>BP:</strong> {{ case.vitals.bp }}</p>
-            <p><strong>HR:</strong> {{ case.vitals.hr }}</p>
+            <p><strong>HR:</strong> {{ case.vitals.hr }} bpm</p>
             <p><strong>RR:</strong> {{ case.vitals.rr }}</p>
             <p><strong>Temp:</strong> {{ case.vitals.temp }}</p>
             <p><strong>SpO2:</strong> {{ case.vitals.spo2 }}</p>
@@ -44,16 +44,16 @@
         <h3 style="margin-top: 0;">History & Medications</h3>
 
         <h4>Past Medical History (PMH)</h4>
-        {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None</p>{% endif %}
+        {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
         <h4>Past Surgical History (PSH)</h4>
-        {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None</p>{% endif %}
+        {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
         <h4>Medications</h4>
         {% if case.medications %}
             <ul>
             {% for med in case.medications %}
-                <li>{{ med.name }} {{ med.dose }} - {{ med.frequency }}</li>
+                <li>{{ med.name }} {{ med.dose }} {{ med.frequency }}</li>
             {% endfor %}
             </ul>
         {% else %}
@@ -76,11 +76,11 @@
         {% if case.ros %}
             {% for system, findings in case.ros.items() %}
                 <p><strong>{{ system|title }}:</strong>
-                {{ findings | join(' ') }}
+                {{ findings | join(', ') }}
                 </p>
             {% endfor %}
         {% else %}
-            <p>Unremarkable</p>
+            <p>All systems reviewed and are negative.</p>
         {% endif %}
     </div>
 
@@ -93,6 +93,62 @@
             {% endfor %}
         {% else %}
             <p>Unremarkable</p>
+        {% endif %}
+    </div>
+
+    <!-- Labs -->
+    <div class="info-panel">
+        <h3 style="margin-top: 0;">Lab Results</h3>
+        {% if case.labs %}
+            <div style="overflow-x: auto;">
+                <table class="lab-table">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Value</th>
+                            <th>Range</th>
+                            <th>Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lab in case.labs %}
+                        <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
+                            <td>{{ lab.name }}</td>
+                            <td>
+                                {% if lab.flag %}
+                                    <span class="flag-badge flag-{{ lab.flag|lower }}">
+                                        {{ lab.value }} {{ lab.unit }}
+                                        {% if lab.flag|lower != 'normal' %}
+                                            <small>({{ lab.flag }})</small>
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span>{{ lab.value }} {{ lab.unit }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ lab.reference_range }}</td>
+                            <td>{{ lab.interpretation }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No labs ordered.</p>
+        {% endif %}
+    </div>
+
+    <!-- Imaging -->
+    <div class="info-panel">
+        <h3 style="margin-top: 0;">Imaging</h3>
+        {% if case.imaging %}
+            {% for study in case.imaging %}
+                <h4>{{ study.type }}</h4>
+                <p><strong>Summary:</strong> {{ study.summary }}</p>
+                <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No imaging studies performed.</p>
         {% endif %}
     </div>
 

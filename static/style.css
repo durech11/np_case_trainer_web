@@ -11,6 +11,8 @@
     --footer-text: #ddd;
     --btn-text: #fff;
     --warning-color: #ff9800;
+    --danger-color-light: #f8d7da;
+    --danger-color-dark: #721c24;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,7 +20,7 @@
         --bg-color: #121212;
         --text-color: #e0e0e0;
         --primary-color: #3792cb;
-        --secondary-color: #555;
+        --secondary-color: #888;
         --header-bg: #1e1e1e;
         --header-border: #333;
         --card-bg: #1e1e1e;
@@ -27,6 +29,8 @@
         --footer-text: #aaa;
         --btn-text: #fff;
         --warning-color: #ffa726;
+        --danger-color-light: #58151c;
+        --danger-color-dark: #f5c6cb;
     }
 }
 
@@ -38,10 +42,11 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    line-height: 1.6;
 }
 
 .container {
-    max-width: 900px;
+    max-width: 960px;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -61,10 +66,14 @@ header {
 header h1 {
     margin: 0;
     font-size: 1.5rem;
-    color: var(--primary-color);
 }
 
-nav a {
+header h1 a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+nav a, nav span {
     color: var(--text-color);
     text-decoration: none;
     margin-left: 1rem;
@@ -127,18 +136,18 @@ footer {
     border: 1px solid var(--card-border);
     padding: 1.5rem;
     border-radius: 8px;
+    margin-bottom: 1.5rem;
 }
 
-.info-panel h3 {
+.info-panel h3, .info-panel h4 {
     margin-top: 0;
+    color: var(--primary-color);
 }
 
-/* Case Grid */
 .case-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1.5rem;
-    margin-top: 1rem;
 }
 
 .case-card {
@@ -153,7 +162,6 @@ footer {
 .case-card h3 {
     margin-top: 0;
     margin-bottom: 0.5rem;
-    color: var(--primary-color);
 }
 
 .case-card .meta {
@@ -168,7 +176,6 @@ footer {
 .case-card .summary {
     flex-grow: 1;
     margin-bottom: 1.5rem;
-    line-height: 1.4;
 }
 
 .empty-state {
@@ -180,7 +187,6 @@ footer {
     color: var(--secondary-color);
 }
 
-/* Badges */
 .badge {
     display: inline-block;
     padding: 0.2rem 0.5rem;
@@ -189,23 +195,71 @@ footer {
     font-weight: bold;
 }
 
-.diff-easy {
+.diff-easy { background-color: #d4edda; color: #155724; }
+.diff-moderate { background-color: #fff3cd; color: #856404; }
+.diff-hard { background-color: #f8d7da; color: #721c24; }
+
+.lab-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.lab-table th, .lab-table td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.lab-table th {
+    font-weight: bold;
+}
+
+/* Lab Result Badges */
+.flag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px; /* pill style */
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+}
+
+.flag-high, .flag-low {
+    background-color: var(--danger-color-light);
+    color: var(--danger-color-dark);
+    border-color: rgba(114, 28, 36, 0.2);
+}
+
+.flag-normal {
     background-color: #d4edda;
     color: #155724;
+    border-color: rgba(21, 87, 36, 0.2);
 }
 
-.diff-moderate {
-    background-color: #fff3cd;
-    color: #856404;
-}
-
-.diff-hard {
-    background-color: #f8d7da;
-    color: #721c24;
+.lab-row-abnormal {
+    background-color: rgba(255, 152, 0, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
     .diff-easy { background-color: #1e4620; color: #75b798; }
     .diff-moderate { background-color: #533f03; color: #ffda6a; }
     .diff-hard { background-color: #58151c; color: #ea868f; }
+
+    .flag-high, .flag-low {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #ffb3b8;
+        border-color: rgba(255, 179, 184, 0.3);
+    }
+
+    .flag-normal {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #a3cfbb;
+        border-color: rgba(163, 207, 187, 0.3);
+    }
+
+    .lab-row-abnormal {
+        background-color: rgba(255, 152, 0, 0.08);
+    }
 }
