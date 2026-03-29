@@ -1,0 +1,92 @@
+{
+  "case_id": "cardio_001",
+  "title": "55M with Exertional Chest Pain",
+  "specialty": "Cardiology",
+  "difficulty": "Intermediate",
+  "summary": "A 55-year-old male presents with worsening substernal chest pressure upon exertion.",
+  "patient_demographics": {
+    "age": 55,
+    "gender": "Male",
+    "ethnicity": "Caucasian",
+    "occupation": "Accountant"
+  },
+  "chief_complaint": "Chest pain when walking up stairs.",
+  "hpi": "Patient reports a 3-week history of episodic substernal chest pressure radiating to his left jaw. The pain occurs after walking roughly two flights of stairs and is relieved by 5 minutes of rest. He denies palpitations, diaphoresis, or syncope. He had a similar episode 6 months ago that he ignored.",
+  "pmh": [
+    "Hypertension",
+    "Hyperlipidemia",
+    "Type 2 Diabetes Mellitus"
+  ],
+  "psh": [
+    "Appendectomy (2005)"
+  ],
+  "medications": [
+    "Lisinopril 10mg daily",
+    "Atorvastatin 20mg daily",
+    "Metformin 500mg BID"
+  ],
+  "allergies": [
+    "Penicillin (rash)"
+  ],
+  "family_history": [
+    "Father died of myocardial infarction at age 60",
+    "Mother alive, has hypertension"
+  ],
+  "social_history": [
+    "Smokes 1 PPD for 30 years",
+    "Occasional alcohol (1-2 beers/week)",
+    "Sedentary lifestyle"
+  ],
+  "ros": [
+    "General: No fever, chills, or weight loss.",
+    "Cardiovascular: Positive for exertional chest pain. Negative for palpitations or orthopnea.",
+    "Respiratory: Negative for shortness of breath or cough.",
+    "GI: Negative for nausea or vomiting."
+  ],
+  "physical_exam": [
+    "General: Awake, alert, no acute distress.",
+    "CV: RRR, normal S1/S2. No murmurs, rubs, or gallops. No JVD.",
+    "Resp: CTA bilaterally, no wheezes or crackles.",
+    "Extremities: No lower extremity edema, 2+ pulses bilaterally."
+  ],
+  "vitals": {
+    "bp": "145/90",
+    "hr": 82,
+    "rr": 16,
+    "temp": "98.6 F",
+    "spo2": "98% on room air",
+    "weight": "210 lbs",
+    "height": "5'10\""
+  },
+  "labs": [
+    "Troponin I: <0.01 ng/mL (Normal)",
+    "BMP: WNL (Creatinine 0.9, K 4.0)",
+    "Lipid Panel: Total Chol 220, LDL 140, HDL 45, Triglycerides 150",
+    "A1c: 7.2%"
+  ],
+  "imaging": [
+    "ECG: Normal sinus rhythm, no acute ST/T wave changes, no Q waves.",
+    "Chest X-Ray: Clear lungs, normal cardiac silhouette."
+  ],
+  "red_flags": [
+    "Exertional pain radiating to jaw",
+    "Significant family history of premature CAD",
+    "Active heavy smoking history"
+  ],
+  "teaching_points": [
+    "Classic presentation of stable angina pectoris involves predictable, exertional chest pain relieved by rest.",
+    "Immediate evaluation requires an ECG to rule out ACS and cardiac biomarkers.",
+    "Risk factor modification is paramount, especially smoking cessation and tightening glycemic/lipid control."
+  ],
+  "model_answers": {
+    "differential_diagnosis": [
+      "Stable Angina Pectoris",
+      "Acute Coronary Syndrome (Unstable Angina / NSTEMI)",
+      "Gastroesophageal Reflux Disease (GERD)",
+      "Musculoskeletal chest pain",
+      "Panic attack / Anxiety"
+    ],
+    "soap_note": "S: 55yo male presents with 3 weeks of exertional substernal chest pain radiating to left jaw, relieved by rest. PMH significant for HTN, HLD, T2DM. Social history includes 30 pack-year smoking. O: BP 145/90, HR 82. CV exam normal, no murmurs. Lungs clear. ECG normal sinus rhythm with no acute ischemic changes. Troponin negative. A: Stable angina pectoris with multiple cardiac risk factors. P: Initiate Aspirin 81mg, maximize statin therapy, prescribe PRN sublingual nitroglycerin, refer for outpatient stress testing, counseling on smoking cessation.",
+    "assessment_and_plan": "1. Stable Angina: Presentation is highly suspicious for CAD. Start ASA 81mg daily and PRN NTG. Order outpatient exercise stress echocardiogram.\n2. Hypertension: BP elevated today. Continue Lisinopril, monitor.\n3. Hyperlipidemia: LDL elevated. Increase Atorvastatin to 40mg daily.\n4. Preventive: Aggressive smoking cessation counseling provided."
+  }
+}
