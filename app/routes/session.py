@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from pathlib import Path
@@ -33,3 +34,29 @@ def session_player(session_id: int, request: Request, session: Session = Depends
             "case": case_data
         }
     )
+
+@router.post("/{session_id}/next")
+def next_stage(session_id: int, request: Request, session: Session = Depends(get_session)):
+    case_session = session.get(CaseStudySession, session_id)
+    if not case_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    if case_session.current_stage < 5:
+        case_session.current_stage += 1
+        session.add(case_session)
+        session.commit()
+        
+    return RedirectResponse(url=f"/session/{session_id}", status_code=303)
+
+@router.post("/{session_id}/prev")
+def prev_stage(session_id: int, request: Request, session: Session = Depends(get_session)):
+    case_session = session.get(CaseStudySession, session_id)
+    if not case_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    if case_session.current_stage > 1:
+        case_session.current_stage -= 1
+        session.add(case_session)
+        session.commit()
+        
+    return RedirectResponse(url=f"/session/{session_id}", status_code=303)
