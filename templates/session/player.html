@@ -3,238 +3,278 @@
 {% block title %}Case Player: {{ case.title }}{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2>{{ case.title }}</h2>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <h2 style="margin: 0;">{{ case.title }}</h2>
     <div style="display: flex; align-items: center; gap: 1rem;">
         <span style="font-weight: bold; color: var(--secondary-color);">Stage {{ session.current_stage }} of 5</span>
         <a href="/cases" class="btn btn-secondary">Exit Case</a>
     </div>
 </div>
 
-<div class="case-player-layout" style="display: flex; flex-direction: column; gap: 1.5rem;">
+<div class="progress-container">
+    <div class="progress-bar" style="width: {{ (session.current_stage / 5) * 100 }}%"></div>
+</div>
 
-    <!-- STAGE 1: Demographics, Chief Complaint, HPI -->
-    {% if session.current_stage >= 1 %}
-    <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div>
-            <h3 style="margin-top: 0;">Patient Demographics</h3>
-            <p><strong>Age:</strong> {{ case.patient_demographics.age }}</p>
-            <p><strong>Gender:</strong> {{ case.patient_demographics.gender }}</p>
-            {% if case.patient_demographics.ethnicity %}<p><strong>Ethnicity:</strong> {{ case.patient_demographics.ethnicity }}</p>{% endif %}
-            {% if case.patient_demographics.occupation %}<p><strong>Occupation:</strong> {{ case.patient_demographics.occupation }}</p>{% endif %}
-        </div>
-        <div>
-            <h3 style="margin-top: 0;">Presentation</h3>
-            <p><strong>Chief Complaint:</strong> {{ case.chief_complaint }}</p>
-        </div>
-    </div>
+<div class="case-player-layout">
 
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">History of Present Illness (HPI)</h3>
-        <p>{{ case.hpi }}</p>
-    </div>
-    {% endif %}
+    <div class="case-content">
+        <!-- STAGE 1: Demographics, Chief Complaint, HPI -->
+        {% if session.current_stage >= 1 %}
+        <div class="stage-section animate-fade-in">
+            <h2 class="stage-header">Stage 1: Presentation</h2>
 
-    <!-- STAGE 2: History (PMH, PSH, Meds, Allergies, FHx, SHx), ROS -->
-    {% if session.current_stage >= 2 %}
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">History & Medications</h3>
-
-        <h4>Past Medical History (PMH)</h4>
-        {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
-
-        <h4>Past Surgical History (PSH)</h4>
-        {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
-
-        <h4>Medications</h4>
-        {% if case.medications %}
-            <ul>
-            {% for med in case.medications %}
-                <li>{{ med.name }} {{ med.dose }} {{ med.frequency }}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>None</p>
-        {% endif %}
-
-        <h4>Allergies</h4>
-        {% if case.allergies %}<ul>{% for item in case.allergies %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
-
-        <h4>Family History</h4>
-        {% if case.family_history %}<ul>{% for item in case.family_history %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
-
-        <h4>Social History</h4>
-        {% if case.social_history %}<ul>{% for item in case.social_history %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
-    </div>
-
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">Review of Systems</h3>
-        {% if case.ros %}
-            {% for system, findings in case.ros.items() %}
-                <p><strong>{{ system|title }}:</strong> {{ findings | join(', ') }}</p>
-            {% endfor %}
-        {% else %}
-            <p>All systems reviewed and are negative.</p>
-        {% endif %}
-    </div>
-    {% endif %}
-
-    <!-- STAGE 3: Physical Exam, Vitals -->
-    {% if session.current_stage >= 3 %}
-    <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <div>
-            <h3 style="margin-top: 0;">Vital Signs</h3>
-            <p><strong>BP:</strong> {{ case.vitals.bp }}</p>
-            <p><strong>HR:</strong> {{ case.vitals.hr }} bpm</p>
-            <p><strong>RR:</strong> {{ case.vitals.rr }}</p>
-            <p><strong>Temp:</strong> {{ case.vitals.temp }}</p>
-            <p><strong>SpO2:</strong> {{ case.vitals.spo2 }}</p>
-            {% if case.vitals.weight %}<p><strong>Weight:</strong> {{ case.vitals.weight }}</p>{% endif %}
-            {% if case.vitals.height %}<p><strong>Height:</strong> {{ case.vitals.height }}</p>{% endif %}
-        </div>
-        <div>
-            <h3 style="margin-top: 0;">Physical Exam</h3>
-            {% if case.physical_exam %}
-                {% for exam in case.physical_exam %}
-                    <p><strong>{{ exam.system }}:</strong> {{ exam.finding }}</p>
-                {% endfor %}
-            {% else %}
-                <p>Unremarkable</p>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- STAGE 4: Diagnostics (Labs, Imaging), Red flags -->
-    {% if session.current_stage >= 4 %}
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">Lab Results</h3>
-        {% if case.labs %}
-            <div style="overflow-x: auto;">
-                <table class="lab-table">
-                    <thead>
-                        <tr>
-                            <th>Test</th>
-                            <th>Value</th>
-                            <th>Range</th>
-                            <th>Interpretation</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lab in case.labs %}
-                        <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
-                            <td>{{ lab.name }}</td>
-                            <td>
-                                {% if lab.flag %}
-                                    <span class="flag-badge flag-{{ lab.flag|lower }}">
-                                        {{ lab.value }} {{ lab.unit }}
-                                        {% if lab.flag|lower != 'normal' %}
-                                            <small>({{ lab.flag }})</small>
-                                        {% endif %}
-                                    </span>
-                                {% else %}
-                                    <span>{{ lab.value }} {{ lab.unit }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ lab.reference_range }}</td>
-                            <td>{{ lab.interpretation }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <h3 style="margin-top: 0;">Patient Demographics</h3>
+                    <p><strong>Age:</strong> {{ case.patient_demographics.age }}</p>
+                    <p><strong>Gender:</strong> {{ case.patient_demographics.gender }}</p>
+                    {% if case.patient_demographics.ethnicity %}<p><strong>Ethnicity:</strong> {{ case.patient_demographics.ethnicity }}</p>{% endif %}
+                    {% if case.patient_demographics.occupation %}<p><strong>Occupation:</strong> {{ case.patient_demographics.occupation }}</p>{% endif %}
+                </div>
+                <div>
+                    <h3 style="margin-top: 0;">Chief Complaint</h3>
+                    <p>{{ case.chief_complaint }}</p>
+                </div>
             </div>
-        {% else %}
-            <p>No labs ordered.</p>
-        {% endif %}
-    </div>
 
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">Imaging</h3>
-        {% if case.imaging %}
-            {% for study in case.imaging %}
-                <h4>{{ study.type }}</h4>
-                <p><strong>Summary:</strong> {{ study.summary }}</p>
-                <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
-            {% endfor %}
-        {% else %}
-            <p>No imaging studies performed.</p>
-        {% endif %}
-    </div>
-
-    <div class="info-panel">
-        <h3 style="margin-top: 0;">Red Flags</h3>
-        {% if case.red_flags %}
-            <ul>
-            {% for flag in case.red_flags %}
-                <li>{{ flag }}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No red flags identified.</p>
-        {% endif %}
-    </div>
-    {% endif %}
-
-    <!-- STAGE 5: Teaching Points, Model Differential, Model SOAP, Model Assessment Plan -->
-    {% if session.current_stage >= 5 %}
-    <div class="info-panel" style="background-color: rgba(0, 86, 179, 0.05); border: 2px solid var(--primary-color);">
-        <h2 style="margin-top: 0; color: var(--primary-color);">Case Review & Teaching Points</h2>
-
-        <h3>Teaching Pearls</h3>
-        {% if case.teaching_points %}
-            <ul>
-            {% for tp in case.teaching_points %}
-                <li><strong>{{ tp.point }}:</strong> {{ tp.explanation }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-
-        <h3>Model Differential Diagnosis</h3>
-        {% if case.model_differential %}
-            <ul>
-            {% for diff in case.model_differential %}
-                <li><strong>{{ diff.diagnosis }}:</strong> {{ diff.rationale }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-
-        <h3>Model Assessment & Plan</h3>
-        {% if case.model_assessment_plan %}
-            <ul>
-            {% for map in case.model_assessment_plan %}
-                <li><strong>{{ map.problem }}:</strong> {{ map.plan }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-
-        <h3>Model SOAP Note</h3>
-        <p><strong>Subjective:</strong> {{ case.model_soap.subjective }}</p>
-        <p><strong>Objective:</strong> {{ case.model_soap.objective }}</p>
-        <p><strong>Assessment:</strong> {{ case.model_soap.assessment }}</p>
-        <p><strong>Plan:</strong> {{ case.model_soap.plan }}</p>
-
-    </div>
-    {% endif %}
-
-    <!-- Progression Controls -->
-    <div style="display: flex; justify-content: space-between; margin-top: 1rem; margin-bottom: 2rem;">
-        <div>
-            {% if session.current_stage > 1 %}
-            <form action="/session/{{ session.id }}/prev" method="post" style="display: inline;">
-                <button type="submit" class="btn btn-secondary">Previous Stage</button>
-            </form>
-            {% endif %}
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">History of Present Illness (HPI)</h3>
+                <p>{{ case.hpi }}</p>
+            </div>
         </div>
-        <div>
-            {% if session.current_stage < 5 %}
-            <form action="/session/{{ session.id }}/next" method="post" style="display: inline;">
-                <button type="submit" class="btn">Reveal Next Stage</button>
-            </form>
+        {% endif %}
+
+        <!-- STAGE 2: History & ROS -->
+        {% if session.current_stage >= 2 %}
+        <div class="stage-section animate-fade-in">
+            <h2 class="stage-header">Stage 2: History</h2>
+
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">Patient History</h3>
+                <h4>Past Medical History (PMH)</h4>
+                {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
+
+                <h4>Past Surgical History (PSH)</h4>
+                {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
+
+                <h4>Medications</h4>
+                {% if case.medications %}
+                    <ul>
+                    {% for med in case.medications %}
+                        <li>{{ med.name }} {{ med.dose }} {{ med.frequency }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>None</p>
+                {% endif %}
+
+                <h4>Allergies</h4>
+                {% if case.allergies %}<ul>{% for item in case.allergies %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
+
+                <h4>Family History</h4>
+                {% if case.family_history %}<ul>{% for item in case.family_history %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
+
+                <h4>Social History</h4>
+                {% if case.social_history %}<ul>{% for item in case.social_history %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
+            </div>
+
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">Review of Systems</h3>
+                {% if case.ros %}
+                    {% for system, findings in case.ros.items() %}
+                        <p><strong>{{ system|title }}:</strong> {{ findings | join(', ') }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>All systems reviewed and are negative.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- STAGE 3: Physical Exam & Vitals -->
+        {% if session.current_stage >= 3 %}
+        <div class="stage-section animate-fade-in">
+            <h2 class="stage-header">Stage 3: Physical Exam</h2>
+
+            <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <h3 style="margin-top: 0;">Vital Signs</h3>
+                    <p><strong>BP:</strong> {{ case.vitals.bp }}</p>
+                    <p><strong>HR:</strong> {{ case.vitals.hr }} bpm</p>
+                    <p><strong>RR:</strong> {{ case.vitals.rr }}</p>
+                    <p><strong>Temp:</strong> {{ case.vitals.temp }}</p>
+                    <p><strong>SpO2:</strong> {{ case.vitals.spo2 }}</p>
+                    {% if case.vitals.weight %}<p><strong>Weight:</strong> {{ case.vitals.weight }}</p>{% endif %}
+                    {% if case.vitals.height %}<p><strong>Height:</strong> {{ case.vitals.height }}</p>{% endif %}
+                </div>
+                <div>
+                    <h3 style="margin-top: 0;">Physical Exam Findings</h3>
+                    {% if case.physical_exam %}
+                        {% for exam in case.physical_exam %}
+                            <p><strong>{{ exam.system }}:</strong> {{ exam.finding }}</p>
+                        {% endfor %}
+                    {% else %}
+                        <p>Unremarkable</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- STAGE 4: Diagnostics -->
+        {% if session.current_stage >= 4 %}
+        <div class="stage-section animate-fade-in">
+            <h2 class="stage-header">Stage 4: Diagnostics</h2>
+
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">Lab Results</h3>
+                {% if case.labs %}
+                    <div style="overflow-x: auto;">
+                        <table class="lab-table">
+                            <thead>
+                                <tr>
+                                    <th>Test</th>
+                                    <th>Value</th>
+                                    <th>Range</th>
+                                    <th>Interpretation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lab in case.labs %}
+                                <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
+                                    <td>{{ lab.name }}</td>
+                                    <td>
+                                        <span class="flag-badge flag-{{ lab.flag|lower }}">{{ lab.value }} {{ lab.unit }}</span>
+                                    </td>
+                                    <td>{{ lab.reference_range }}</td>
+                                    <td>{{ lab.interpretation }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No labs ordered.</p>
+                {% endif %}
+            </div>
+
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">Imaging</h3>
+                {% if case.imaging %}
+                    {% for study in case.imaging %}
+                        <h4>{{ study.type }}</h4>
+                        <p><strong>Summary:</strong> {{ study.summary }}</p>
+                        <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>No imaging studies performed.</p>
+                {% endif %}
+    </div>
+
+            <div class="info-panel">
+                <h3 style="margin-top: 0;">Red Flags</h3>
+                {% if case.red_flags %}
+                    <ul>
+                    {% for flag in case.red_flags %}
+                        <li>{{ flag }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No red flags identified.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- STAGE 5: Review -->
+        {% if session.current_stage >= 5 %}
+        <div class="stage-section animate-fade-in">
+            <h2 class="stage-header">Stage 5: Case Review</h2>
+            <div class="info-panel" style="background-color: rgba(0, 86, 179, 0.05); border: 2px solid var(--primary-color);">
+                <h3 style="margin-top: 0;">Teaching Pearls</h3>
+                {% if case.teaching_points %}
+                    <ul>
+                    {% for tp in case.teaching_points %}
+                        <li><strong>{{ tp.point }}:</strong> {{ tp.explanation }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <h3>Model Differential Diagnosis</h3>
+                {% if case.model_differential %}
+                    <ul>
+                    {% for diff in case.model_differential %}
+                        <li><strong>{{ diff.diagnosis }}:</strong> {{ diff.rationale }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <h3>Model Assessment & Plan</h3>
+                {% if case.model_assessment_plan %}
+                    <ul>
+                    {% for map in case.model_assessment_plan %}
+                        <li><strong>{{ map.problem }}:</strong> {{ map.plan }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <h3>Model SOAP Note</h3>
+                <p><strong>Subjective:</strong> {{ case.model_soap.subjective }}</p>
+                <p><strong>Objective:</strong> {{ case.model_soap.objective }}</p>
+                <p><strong>Assessment:</strong> {{ case.model_soap.assessment }}</p>
+                <p><strong>Plan:</strong> {{ case.model_soap.plan }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Sidebar: User Workspace -->
+    <div class="workspace-sidebar">
+        <div class="info-panel sticky-panel">
+            <h3 style="margin-top: 0;">Your Differential Diagnosis</h3>
+
+            {% if session.current_stage >= 2 %}
+                <form action="/session/{{ session.id }}/ddx/add" method="post" class="ddx-form">
+                    <input type="text" name="diagnosis" placeholder="e.g., Stable angina, ACS, GERD" required>
+                    <button type="submit" class="btn">+</button>
+                </form>
+
+                {% if session.user_differential_diagnosis %}
+                <ul class="ddx-list">
+                    {% for dx in session.user_differential_diagnosis %}
+                    <li>
+                        <span>{{ dx }}</span>
+                        <form action="/session/{{ session.id }}/ddx/remove" method="post" style="display: inline;">
+                            <input type="hidden" name="diagnosis" value="{{ dx }}">
+                            <button type="submit" class="btn-remove">&times;</button>
+                        </form>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p style="color: var(--secondary-color); text-align: center; margin-top: 1rem;">Your list is empty.</p>
+                {% endif %}
             {% else %}
-            <span class="btn btn-secondary" style="opacity: 0.7; cursor: default;">Case Completed</span>
+                <p style="color: var(--secondary-color);">This will become available in Stage 2.</p>
             {% endif %}
         </div>
     </div>
 
+</div>
+
+<!-- Progression Controls -->
+<div style="display: flex; justify-content: space-between; margin-top: 1rem; margin-bottom: 2rem;">
+    <div>
+        <form action="/session/{{ session.id }}/prev" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-secondary" {% if session.current_stage == 1 %}disabled{% endif %}>Previous Stage</button>
+        </form>
+    </div>
+    <div>
+        <form action="/session/{{ session.id }}/next" method="post" style="display: inline;">
+            <button type="submit" class="btn" {% if session.current_stage == 5 %}disabled{% endif %}>
+                {% if session.current_stage == 5 %}Case Completed{% else %}Reveal Next Stage{% endif %}
+            </button>
+        </form>
+    </div>
 </div>
 {% endblock %}
