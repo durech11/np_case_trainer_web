@@ -1,1 +1,0 @@
-# This file is obsolete. Please refer to case_study.py
