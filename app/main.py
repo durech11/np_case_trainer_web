@@ -3,8 +3,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 from pathlib import Path
-from app.core.database import init_db, get_session
+from app.core.database import init_db, get_session, engine
 from app.models.case_study import CaseStudy
+from app.services.case_importer import import_local_cases
 
 # BASE_DIR is now the project root (one level up from app/)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,6 +22,9 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 @app.on_event("startup")
 def on_startup():
     init_db()
+    # Import local cases on startup
+    with Session(engine) as session:
+        import_local_cases(session)
 
 @app.get("/health")
 def health_check():
