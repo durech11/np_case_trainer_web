@@ -46,7 +46,7 @@ body {
 }
 
 .container {
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -268,13 +268,12 @@ button:disabled {
     font-weight: bold;
 }
 
-/* Lab Result Badges */
 .flag-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
     padding: 0.2rem 0.6rem;
-    border-radius: 12px; /* pill style */
+    border-radius: 12px;
     font-size: 0.85rem;
     border: 1px solid transparent;
 }
@@ -295,7 +294,6 @@ button:disabled {
     background-color: rgba(255, 152, 0, 0.08);
 }
 
-/* Progress Bar */
 .progress-container {
     width: 100%;
     height: 8px;
@@ -307,12 +305,11 @@ button:disabled {
 
 .progress-bar {
     height: 100%;
-    background: #4ade80; /* green */
+    background: #4ade80;
     border-radius: 999px;
     transition: width 0.4s ease;
 }
 
-/* Animations */
 .animate-fade-in {
     animation: fadeIn 0.4s ease-out forwards;
 }
@@ -322,7 +319,6 @@ button:disabled {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Layout */
 .case-player-layout {
     display: flex;
     flex-direction: column;
@@ -333,6 +329,7 @@ button:disabled {
     .case-player-layout {
         display: grid;
         grid-template-columns: 2fr 1fr;
+        gap: 2rem;
     }
 
     .sticky-panel {
@@ -414,7 +411,6 @@ button:disabled {
     color: var(--btn-text);
 }
 
-/* Glossary styling */
 .glossary-term {
     border-bottom: 1px dashed var(--primary-color);
     cursor: pointer;
@@ -469,6 +465,134 @@ button:disabled {
     color: var(--text-color);
 }
 
+.stage-accordion {
+    margin-bottom: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.stage-accordion summary {
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    background-color: var(--header-bg);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stage-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+.stage-accordion summary::after {
+    content: '▼';
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.stage-accordion[open] summary::after {
+    transform: rotate(-180deg);
+}
+
+.stage-accordion[open] summary {
+    border-bottom: 1px solid var(--card-border);
+}
+
+.stage-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.stage-content .info-panel {
+    margin-bottom: 0;
+    border: none;
+    padding: 0;
+    background: transparent;
+}
+
+.bucket-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bucket-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.bucket-item-flagged {
+    border-color: var(--warning-color);
+    box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.18);
+}
+
+.bucket-item-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.bucket-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.btn-flag-toggle {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    margin-right: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.34);
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.flag-toggle-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.btn-flag-toggle:hover {
+    transform: translateY(-1px);
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.34);
+    color: rgba(255, 255, 255, 0.58);
+}
+
+.btn-flag-toggle.is-flagged {
+    background-color: rgba(220, 53, 69, 0.12);
+    border-color: rgba(220, 53, 69, 0.65);
+    color: #dc3545;
+    box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.18);
+}
+
+.btn-flag-toggle.is-flagged:hover {
+    background-color: rgba(220, 53, 69, 0.18);
+    border-color: rgba(220, 53, 69, 0.85);
+    color: #dc3545;
+}
+
 @media (prefers-color-scheme: dark) {
     .diff-easy { background-color: #1e4620; color: #75b798; }
     .diff-moderate { background-color: #533f03; color: #ffda6a; }
@@ -489,4 +613,92 @@ button:disabled {
     .lab-row-abnormal {
         background-color: rgba(255, 152, 0, 0.08);
     }
+}
+
+
+#sessionPageShell {
+    transition: opacity 0.18s ease;
+}
+
+#sessionPageShell .is-submitting {
+    pointer-events: none;
+}
+
+.btn-flag-toggle {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.42);
+}
+
+.btn-flag-toggle:hover {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.btn-flag-toggle.is-flagged {
+    background-color: rgba(220, 53, 69, 0.14);
+    color: #ff4d5f;
+}
+
+.btn-flag-toggle.is-flagged:hover {
+    color: #ff4d5f;
+}
+
+.case-player-layout {
+    scroll-margin-top: 1rem;
+}
+
+
+.btn-add-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--secondary-color);
+    border-radius: 999px;
+    padding: 0.22rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.btn-add-toggle:hover:not(:disabled) {
+    background-color: rgba(0, 86, 179, 0.08);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.btn-add-toggle.is-added,
+.btn-add-toggle:disabled.is-added {
+    background-color: rgba(25, 135, 84, 0.12);
+    border-color: rgba(25, 135, 84, 0.45);
+    color: #198754;
+    opacity: 1;
+    cursor: default;
+}
+
+.bucket-item-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.suggestion-pill {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.suggestion-pill:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(0, 86, 179, 0.08);
+}
+
+.is-submitting {
+    opacity: 0.72;
 }

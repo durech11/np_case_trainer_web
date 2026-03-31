@@ -146,9 +146,24 @@
     }
   ],
   "red_flags": [
-    "Exertional pain radiating to jaw",
-    "Significant family history of premature CAD",
-    "Active heavy smoking history"
+    {
+      "clue": "radiating to his left jaw",
+      "importance": "High",
+      "explanation": "Radiating pain is a classic indicator of cardiac ischemia rather than localized musculoskeletal pain.",
+      "related_diagnoses": ["Stable Angina Pectoris", "Acute Coronary Syndrome (Unstable Angina / NSTEMI)"]
+    },
+    {
+      "clue": "Father died of myocardial infarction at age 60",
+      "importance": "High",
+      "explanation": "A primary relative with a premature MI heavily increases the pre-test probability of ischemic heart disease.",
+      "related_diagnoses": ["Stable Angina Pectoris", "Acute Coronary Syndrome (Unstable Angina / NSTEMI)"]
+    },
+    {
+      "clue": "Smokes 1 PPD for 30 years",
+      "importance": "Medium",
+      "explanation": "Smoking causes endothelial dysfunction and accelerates atherosclerosis, a key driver of coronary artery disease.",
+      "related_diagnoses": ["Stable Angina Pectoris", "Acute Coronary Syndrome (Unstable Angina / NSTEMI)"]
+    }
   ],
   "teaching_points": [
     {

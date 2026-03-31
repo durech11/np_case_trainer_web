@@ -58,6 +58,12 @@ class ModelAssessmentPlan(BaseModel):
     problem: str
     plan: str
 
+class RedFlagItem(BaseModel):
+    clue: str
+    importance: str
+    explanation: str
+    related_diagnoses: List[str] = Field(default_factory=list)
+
 # --- Main Case Study Schema ---
 
 class CaseStudySchema(BaseModel):
@@ -93,7 +99,7 @@ class CaseStudySchema(BaseModel):
     imaging: List[ImagingStudy] = Field(default_factory=list)
     
     # Educational Content
-    red_flags: List[str] = Field(default_factory=list)
+    red_flags: List[RedFlagItem] = Field(default_factory=list)
     teaching_points: List[TeachingPoint] = Field(default_factory=list)
     
     # Model Answers

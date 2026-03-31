@@ -3,29 +3,67 @@
 {% block title %}Case Player: {{ case.title }}{% endblock %}
 
 {% block content %}
+<div id="sessionPageShell" data-enhanced-session="true">
 <!-- Macros for Action Menus -->
-{% macro action_menu(session_id, clue_text, types) %}
+{% macro action_menu(session_id, clue_text, default_bucket, selected_clues_lookup) %}
+{% set is_added = clue_text|lower in selected_clues_lookup %}
 <div class="action-menu" style="display: inline-flex; gap: 2px; margin-right: 8px; vertical-align: middle;">
-    {% if 'S' in types %}
-    <form action="/session/{{ session_id }}/bucket/subjective_clues/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Subjective">+S</button></form>
-    {% endif %}
-    {% if 'O' in types %}
-    <form action="/session/{{ session_id }}/bucket/objective_clues/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Objective">+O</button></form>
-    {% endif %}
-    {% if 'Flag' in types %}
-    <form action="/session/{{ session_id }}/bucket/red_flag_clues/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Red Flags" style="color: var(--danger-color-dark); border-color: var(--danger-color-dark);">+Flag</button></form>
-    {% endif %}
-    {% if 'Dx' in types %}
-    <form action="/session/{{ session_id }}/bucket/assessment_clues/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Differential Support">+Dx</button></form>
-    {% endif %}
-    {% if 'Test' in types %}
-    <form action="/session/{{ session_id }}/bucket/tests_to_consider/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Tests to Consider">+Test</button></form>
-    {% endif %}
-    {% if 'Tx' in types %}
-    <form action="/session/{{ session_id }}/bucket/interventions_to_consider/add" method="post" style="margin: 0;"><input type="hidden" name="clue" value="{{ clue_text }}"><button type="submit" class="btn-icon" title="Add to Interventions">+Tx</button></form>
+    <form action="/session/{{ session_id }}/bucket/{{ default_bucket }}/add" method="post" class="js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="margin: 0;">
+        <input type="hidden" name="clue" value="{{ clue_text }}">
+        <button type="submit" class="btn-add-toggle {% if is_added %}is-added{% endif %}" title="{% if is_added %}Already added{% else %}Add to reasoning panel{% endif %}" {% if is_added %}disabled{% endif %}>
+            <span aria-hidden="true">{% if is_added %}✓{% else %}+{% endif %}</span>
+            <span>{% if is_added %}Added{% else %}Add{% endif %}</span>
+        </button>
+    </form>
+</div>
+{% endmacro %}
+
+{% macro render_bucket(title, bucket_name, items, flagged_lookup, session_id) %}
+<div class="workspace-section">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <strong style="color: var(--primary-color);">{{ title }}</strong>
+        {% if items %}
+        <form action="/session/{{ session_id }}/bucket/{{ bucket_name }}/clear" method="post" class="js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="margin: 0;">
+            <button type="submit" class="btn-link" style="font-size: 0.75rem;">Clear All</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if items %}
+        <ul class="ddx-list bucket-list" style="margin-top: 0.5rem;">
+            {% for item in items %}
+            {% set is_flagged = item|lower in flagged_lookup %}
+            <li class="bucket-item {% if is_flagged %}bucket-item-flagged{% endif %}">
+                <div class="bucket-item-main">
+                    <span>{{ item }}</span>
+                </div>
+                <div class="bucket-item-actions">
+                    <form action="/session/{{ session_id }}/red-flag/toggle" method="post" class="js-session-form" data-enhance="flag-toggle" data-swap="#reasoningSidebar,#caseMainColumn" style="margin: 0;">
+                        <input type="hidden" name="clue" value="{{ item }}">
+                        <button
+                            type="submit"
+                            class="btn-icon btn-flag-toggle {% if is_flagged %}is-flagged{% endif %}" data-flag-button="true"
+                            title="{% if is_flagged %}Unmark red flag{% else %}Mark as red flag{% endif %}"
+                            aria-pressed="{% if is_flagged %}true{% else %}false{% endif %}"
+                        >
+                            <span class="flag-toggle-icon" aria-hidden="true">⚑</span>
+                        </button>
+                    </form>
+                    <form action="/session/{{ session_id }}/bucket/{{ bucket_name }}/remove" method="post" class="js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="margin: 0;">
+                        <input type="hidden" name="clue" value="{{ item }}">
+                        <button type="submit" class="btn-remove" title="Remove clue">&times;</button>
+                    </form>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-list-msg" style="margin-top: 0.2rem;">Click +Add in the case to collect findings here.</p>
     {% endif %}
 </div>
 {% endmacro %}
+
+<input type="hidden" id="currentStageData" value="{{ session.current_stage }}">
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
     <h2 style="margin: 0;">{{ case.title }}</h2>
@@ -40,199 +78,216 @@
 </div>
 
 <div class="case-player-layout">
-
-    <div class="case-content">
-        <!-- STAGE 1: Demographics, Chief Complaint, HPI -->
+    <div class="case-content" id="caseMainColumn">
         {% if session.current_stage >= 1 %}
-        <div class="stage-section animate-fade-in">
-            <h2 class="stage-header">Stage 1: Presentation</h2>
-
-            <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div>
-                    <h3 style="margin-top: 0;">Patient Demographics</h3>
-                    <p><strong>Age:</strong> {{ case.patient_demographics.age }}</p>
-                    <p><strong>Gender:</strong> {{ case.patient_demographics.gender }}</p>
-                    {% if case.patient_demographics.ethnicity %}<p><strong>Ethnicity:</strong> {{ case.patient_demographics.ethnicity }}</p>{% endif %}
-                    {% if case.patient_demographics.occupation %}<p><strong>Occupation:</strong> {{ case.patient_demographics.occupation }}</p>{% endif %}
+        <details class="stage-accordion animate-fade-in" data-stage="1" {% if session.current_stage == 1 %}open{% endif %}>
+            <summary>Stage 1: Presentation</summary>
+            <div class="stage-content">
+                <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h3 style="margin-top: 0;">Patient Demographics</h3>
+                        <p><strong>Age:</strong> {{ case.patient_demographics.age }}</p>
+                        <p><strong>Gender:</strong> {{ case.patient_demographics.gender }}</p>
+                        {% if case.patient_demographics.ethnicity %}<p><strong>Ethnicity:</strong> {{ case.patient_demographics.ethnicity }}</p>{% endif %}
+                        {% if case.patient_demographics.occupation %}<p><strong>Occupation:</strong> {{ case.patient_demographics.occupation }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <h3 style="margin-top: 0;">Chief Complaint</h3>
+                        <p>{{ case.chief_complaint }}</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 style="margin-top: 0;">Chief Complaint</h3>
-                    <p>{{ case.chief_complaint }}</p>
+
+                <div class="info-panel">
+                    <h3 style="margin-top: 0;">History of Present Illness (HPI)</h3>
+                    <p>{{ action_menu(session.id, "HPI: " ~ case.hpi|truncate(50), 'subjective_clues', selected_clues_lookup) }} {{ case.hpi }}</p>
                 </div>
             </div>
-
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">History of Present Illness (HPI)</h3>
-                <p>{{ action_menu(session.id, "HPI: " ~ case.hpi|truncate(50), ['S', 'Flag', 'Dx']) }} {{ case.hpi }}</p>
-            </div>
-        </div>
+        </details>
         {% endif %}
 
-        <!-- STAGE 2: History & ROS -->
         {% if session.current_stage >= 2 %}
-        <div class="stage-section animate-fade-in">
-            <h2 class="stage-header">Stage 2: History</h2>
+        <details class="stage-accordion animate-fade-in" data-stage="2" {% if session.current_stage == 2 %}open{% endif %}>
+            <summary>Stage 2: History & ROS</summary>
+            <div class="stage-content">
+                <div class="info-panel">
+                    <h3 style="margin-top: 0;">Patient History</h3>
+                    <h4>Past Medical History (PMH)</h4>
+                    {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ action_menu(session.id, 'PMH: ' ~ item, 'subjective_clues', selected_clues_lookup) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">Patient History</h3>
-                <h4>Past Medical History (PMH)</h4>
-                {% if case.pmh %}<ul>{% for item in case.pmh %}<li>{{ action_menu(session.id, 'PMH: ' ~ item, ['S', 'Flag', 'Dx']) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
+                    <h4>Past Surgical History (PSH)</h4>
+                    {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ action_menu(session.id, 'PSH: ' ~ item, 'subjective_clues', selected_clues_lookup) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
 
-                <h4>Past Surgical History (PSH)</h4>
-                {% if case.psh %}<ul>{% for item in case.psh %}<li>{{ action_menu(session.id, 'PSH: ' ~ item, ['S', 'Flag']) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>None reported.</p>{% endif %}
-
-                <h4>Medications</h4>
-                {% if case.medications %}
-                    <ul>
-                    {% for med in case.medications %}
-                        <li>{{ action_menu(session.id, 'Med: ' ~ med.name, ['S', 'Flag', 'Tx']) }} <span class="glossary-term" onclick="showGlossary('{{ med.name }}')">{{ med.name }}</span> {{ med.dose }} {{ med.frequency }}</li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>None</p>
-                {% endif %}
-
-                <h4>Allergies</h4>
-                {% if case.allergies %}<ul>{% for item in case.allergies %}<li>{{ action_menu(session.id, 'Allergy: ' ~ item, ['S', 'Flag']) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
-
-                <h4>Family History</h4>
-                {% if case.family_history %}<ul>{% for item in case.family_history %}<li>{{ action_menu(session.id, 'FHx: ' ~ item, ['S', 'Flag', 'Dx']) }} {{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
-
-                <h4>Social History</h4>
-                {% if case.social_history %}<ul>{% for item in case.social_history %}<li>{{ action_menu(session.id, 'SHx: ' ~ item, ['S', 'Flag', 'Dx']) }} {{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
-            </div>
-
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">Review of Systems</h3>
-                {% if case.ros %}
-                    {% for system, findings in case.ros.items() %}
-                        <p><strong>{{ system|title }}:</strong>
-                        {% for finding in findings %}
-                            <br>
-                            {{ action_menu(session.id, 'ROS ' ~ system|title ~ ': ' ~ finding, ['S', 'Flag', 'Dx']) }} {{ finding }}
+                    <h4>Medications</h4>
+                    {% if case.medications %}
+                        <ul>
+                        {% for med in case.medications %}
+                            <li>{{ action_menu(session.id, 'Med: ' ~ med.name, 'subjective_clues', selected_clues_lookup) }} <span class="glossary-term" onclick="showGlossary('{{ med.name }}')">{{ med.name }}</span> {{ med.dose }} {{ med.frequency }}</li>
                         {% endfor %}
-                        </p>
-                    {% endfor %}
-                {% else %}
-                    <p>All systems reviewed and are negative.</p>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
+                        </ul>
+                    {% else %}
+                        <p>None</p>
+                    {% endif %}
 
-        <!-- STAGE 3: Physical Exam & Vitals -->
-        {% if session.current_stage >= 3 %}
-        <div class="stage-section animate-fade-in">
-            <h2 class="stage-header">Stage 3: Physical Exam</h2>
+                    <h4>Allergies</h4>
+                    {% if case.allergies %}<ul>{% for item in case.allergies %}<li>{{ action_menu(session.id, 'Allergy: ' ~ item, 'subjective_clues', selected_clues_lookup) }} <span class="glossary-term" onclick="showGlossary('{{ item }}')">{{ item }}</span></li>{% endfor %}</ul>{% else %}<p>No Known Drug Allergies</p>{% endif %}
 
-            <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div>
-                    <h3 style="margin-top: 0;">Vital Signs</h3>
-                    <p>{{ action_menu(session.id, 'BP: ' ~ case.vitals.bp, ['O', 'Flag', 'Dx']) }} <strong>BP:</strong> {{ case.vitals.bp }}</p>
-                    <p>{{ action_menu(session.id, 'HR: ' ~ case.vitals.hr, ['O', 'Flag', 'Dx']) }} <strong>HR:</strong> {{ case.vitals.hr }} bpm</p>
-                    <p>{{ action_menu(session.id, 'RR: ' ~ case.vitals.rr, ['O', 'Flag', 'Dx']) }} <strong>RR:</strong> {{ case.vitals.rr }}</p>
-                    <p>{{ action_menu(session.id, 'Temp: ' ~ case.vitals.temp, ['O', 'Flag', 'Dx']) }} <strong>Temp:</strong> {{ case.vitals.temp }}</p>
-                    <p>{{ action_menu(session.id, 'SpO2: ' ~ case.vitals.spo2, ['O', 'Flag', 'Dx']) }} <strong>SpO2:</strong> {{ case.vitals.spo2 }}</p>
-                    {% if case.vitals.weight %}<p>{{ action_menu(session.id, 'Weight: ' ~ case.vitals.weight, ['O']) }} <strong>Weight:</strong> {{ case.vitals.weight }}</p>{% endif %}
-                    {% if case.vitals.height %}<p>{{ action_menu(session.id, 'Height: ' ~ case.vitals.height, ['O']) }} <strong>Height:</strong> {{ case.vitals.height }}</p>{% endif %}
+                    <h4>Family History</h4>
+                    {% if case.family_history %}<ul>{% for item in case.family_history %}<li>{{ action_menu(session.id, 'FHx: ' ~ item, 'subjective_clues', selected_clues_lookup) }} {{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
+
+                    <h4>Social History</h4>
+                    {% if case.social_history %}<ul>{% for item in case.social_history %}<li>{{ action_menu(session.id, 'SHx: ' ~ item, 'subjective_clues', selected_clues_lookup) }} {{ item }}</li>{% endfor %}</ul>{% else %}<p>Non-contributory</p>{% endif %}
                 </div>
-                <div>
-                    <h3 style="margin-top: 0;">Physical Exam Findings</h3>
-                    {% if case.physical_exam %}
-                        {% for exam in case.physical_exam %}
-                            <p>{{ action_menu(session.id, 'Exam: ' ~ exam.system ~ ' - ' ~ exam.finding, ['O', 'Flag', 'Dx']) }} <strong>{{ exam.system }}:</strong> {{ exam.finding }}</p>
+
+                <div class="info-panel">
+                    <h3 style="margin-top: 0;">Review of Systems</h3>
+                    {% if case.ros %}
+                        {% for system, findings in case.ros.items() %}
+                            <p><strong>{{ system|title }}:</strong>
+                            {% for finding in findings %}
+                                <br>
+                                {{ action_menu(session.id, 'ROS ' ~ system|title ~ ': ' ~ finding, 'subjective_clues', selected_clues_lookup) }} {{ finding }}
+                            {% endfor %}
+                            </p>
                         {% endfor %}
                     {% else %}
-                        <p>Unremarkable</p>
+                        <p>All systems reviewed and are negative.</p>
                     {% endif %}
                 </div>
             </div>
-        </div>
+        </details>
         {% endif %}
 
-        <!-- STAGE 4: Diagnostics -->
-        {% if session.current_stage >= 4 %}
-        <div class="stage-section animate-fade-in">
-            <h2 class="stage-header">Stage 4: Diagnostics</h2>
-
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">Lab Results</h3>
-                {% if case.labs %}
-                    <div style="overflow-x: auto;">
-                        <table class="lab-table">
-                            <thead>
-                                <tr>
-                                    <th>Action</th>
-                                    <th>Test</th>
-                                    <th>Value</th>
-                                    <th>Range</th>
-                                    <th>Interpretation</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for lab in case.labs %}
-                                <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
-                                    <td>{{ action_menu(session.id, 'Lab: ' ~ lab.name ~ ' ' ~ lab.value, ['O', 'Flag', 'Dx']) }}</td>
-                                    <td><span class="glossary-term" onclick="showGlossary('{{ lab.name }}')">{{ lab.name }}</span></td>
-                                    <td>
-                                        {% set safe_flag = lab.flag|lower if lab.flag else 'normal' %}
-                                        {% if safe_flag != 'normal' %}
-                                            <span class="flag-badge flag-{{ safe_flag }}">
-                                                {{ lab.value }} {{ lab.unit }}
-                                                <small>({{ lab.flag }})</small>
-                                            </span>
-                                        {% else %}
-                                            <span>{{ lab.value }} {{ lab.unit }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ lab.reference_range }}</td>
-                                    <td>{{ lab.interpretation }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        {% if session.current_stage >= 3 %}
+        <details class="stage-accordion animate-fade-in" data-stage="3" {% if session.current_stage == 3 %}open{% endif %}>
+            <summary>Stage 3: Physical Exam</summary>
+            <div class="stage-content">
+                <div class="info-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h3 style="margin-top: 0;">Vital Signs</h3>
+                        <p>{{ action_menu(session.id, 'BP: ' ~ case.vitals.bp, 'objective_clues', selected_clues_lookup) }} <strong>BP:</strong> {{ case.vitals.bp }}</p>
+                        <p>{{ action_menu(session.id, 'HR: ' ~ case.vitals.hr, 'objective_clues', selected_clues_lookup) }} <strong>HR:</strong> {{ case.vitals.hr }} bpm</p>
+                        <p>{{ action_menu(session.id, 'RR: ' ~ case.vitals.rr, 'objective_clues', selected_clues_lookup) }} <strong>RR:</strong> {{ case.vitals.rr }}</p>
+                        <p>{{ action_menu(session.id, 'Temp: ' ~ case.vitals.temp, 'objective_clues', selected_clues_lookup) }} <strong>Temp:</strong> {{ case.vitals.temp }}</p>
+                        <p>{{ action_menu(session.id, 'SpO2: ' ~ case.vitals.spo2, 'objective_clues', selected_clues_lookup) }} <strong>SpO2:</strong> {{ case.vitals.spo2 }}</p>
+                        {% if case.vitals.weight %}<p>{{ action_menu(session.id, 'Weight: ' ~ case.vitals.weight, 'objective_clues', selected_clues_lookup) }} <strong>Weight:</strong> {{ case.vitals.weight }}</p>{% endif %}
+                        {% if case.vitals.height %}<p>{{ action_menu(session.id, 'Height: ' ~ case.vitals.height, 'objective_clues', selected_clues_lookup) }} <strong>Height:</strong> {{ case.vitals.height }}</p>{% endif %}
                     </div>
-                {% else %}
-                    <p>No labs ordered.</p>
-                {% endif %}
+                    <div>
+                        <h3 style="margin-top: 0;">Physical Exam Findings</h3>
+                        {% if case.physical_exam %}
+                            {% for exam in case.physical_exam %}
+                                <p>{{ action_menu(session.id, 'Exam: ' ~ exam.system ~ ' - ' ~ exam.finding, 'objective_clues', selected_clues_lookup) }} <strong>{{ exam.system }}:</strong> {{ exam.finding }}</p>
+                            {% endfor %}
+                        {% else %}
+                            <p>Unremarkable</p>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">Imaging</h3>
-                {% if case.imaging %}
-                    {% for study in case.imaging %}
-                        <h4>{{ action_menu(session.id, 'Imaging: ' ~ study.type ~ ' - ' ~ study.summary, ['O', 'Flag', 'Dx']) }} <span class="glossary-term" onclick="showGlossary('{{ study.type }}')">{{ study.type }}</span></h4>
-                        <p><strong>Summary:</strong> {{ study.summary }}</p>
-                        <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p>No imaging studies performed.</p>
-                {% endif %}
-            </div>
-
-            <div class="info-panel">
-                <h3 style="margin-top: 0;">Red Flags</h3>
-                {% if case.red_flags %}
-                    <ul>
-                    {% for flag in case.red_flags %}
-                        <li>{{ action_menu(session.id, 'Red Flag: ' ~ flag, ['Flag', 'Dx']) }} <span class="glossary-term" onclick="showGlossary('{{ flag }}')">{{ flag }}</span></li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No red flags identified.</p>
-                {% endif %}
-            </div>
-        </div>
+        </details>
         {% endif %}
 
-        <!-- STAGE 5: Review -->
+        {% if session.current_stage >= 4 %}
+        <details class="stage-accordion animate-fade-in" data-stage="4" {% if session.current_stage == 4 %}open{% endif %}>
+            <summary>Stage 4: Diagnostics</summary>
+            <div class="stage-content">
+                <div class="info-panel">
+                    <h3 style="margin-top: 0;">Lab Results</h3>
+                    {% if case.labs %}
+                        <div style="overflow-x: auto;">
+                            <table class="lab-table">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Test</th>
+                                        <th>Value</th>
+                                        <th>Range</th>
+                                        <th>Interpretation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lab in case.labs %}
+                                    <tr class="{% if lab.flag and lab.flag|lower != 'normal' %}lab-row-abnormal{% endif %}">
+                                        <td>{{ action_menu(session.id, 'Lab: ' ~ lab.name ~ ' ' ~ lab.value, 'objective_clues', selected_clues_lookup) }}</td>
+                                        <td><span class="glossary-term" onclick="showGlossary('{{ lab.name }}')">{{ lab.name }}</span></td>
+                                        <td>
+                                            {% set safe_flag = lab.flag|lower if lab.flag else 'normal' %}
+                                            {% if safe_flag != 'normal' %}
+                                                <span class="flag-badge flag-{{ safe_flag }}">
+                                                    {{ lab.value }} {{ lab.unit }}
+                                                    <small>({{ lab.flag }})</small>
+                                                </span>
+                                            {% else %}
+                                                <span>{{ lab.value }} {{ lab.unit }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ lab.reference_range }}</td>
+                                        <td>{{ lab.interpretation }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No labs ordered.</p>
+                    {% endif %}
+                </div>
+
+                <div class="info-panel">
+                    <h3 style="margin-top: 0;">Imaging</h3>
+                    {% if case.imaging %}
+                        {% for study in case.imaging %}
+                            <h4>{{ action_menu(session.id, 'Imaging: ' ~ study.type ~ ' - ' ~ study.summary, 'objective_clues', selected_clues_lookup) }} <span class="glossary-term" onclick="showGlossary('{{ study.type }}')">{{ study.type }}</span></h4>
+                            <p><strong>Summary:</strong> {{ study.summary }}</p>
+                            <p><strong>Interpretation:</strong> {{ study.interpretation }}</p>
+                        {% endfor %}
+                    {% else %}
+                        <p>No imaging studies performed.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </details>
+        {% endif %}
+
         {% if session.current_stage >= 5 %}
-        <div class="stage-section animate-fade-in">
-            <h2 class="stage-header">Stage 5: Case Review</h2>
-            <div class="info-panel" style="background-color: rgba(0, 86, 179, 0.05); border: 2px solid var(--primary-color);">
+        <details class="stage-accordion animate-fade-in" data-stage="5" open>
+            <summary>Stage 5: Case Review</summary>
+            <div class="stage-content" style="background-color: rgba(0, 86, 179, 0.05); border: 2px solid var(--primary-color);">
+                <h3 style="margin-top: 0; color: var(--primary-color);">Red Flag Feedback</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div>
+                        <h4>Your Identified Red Flags</h4>
+                        {% if session.red_flag_clues %}
+                            <ul style="list-style: none; padding: 0;">
+                            {% for flag in session.red_flag_clues %}
+                                <li style="margin-bottom: 0.5rem;">
+                                    {% if flag in review.correct_flags %}
+                                        <span style="color: green;">✅</span> <strong>{{ flag }}</strong>
+                                    {% else %}
+                                        <span style="color: gray;">➖</span> <span>{{ flag }}</span> <span style="font-size: 0.8em; color: var(--secondary-color);">(Extra)</span>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>You did not mark any red flags.</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 style="color: var(--danger-color-dark);">Missed Red Flags</h4>
+                        {% if review.missed_flags %}
+                            <ul style="color: var(--danger-color-dark); padding-left: 1.5rem;">
+                            {% for flag in review.missed_flags %}
+                                <li><span class="glossary-term" onclick="showGlossary('{{ flag }}')">{{ flag }}</span></li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="color: green;">You found all key red flags!</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-                <h3 style="margin-top: 0; color: var(--primary-color);">Differential Diagnosis Feedback</h3>
-
+                <h3 style="margin-top: 0; border-top: 1px solid var(--card-border); padding-top: 1rem; color: var(--primary-color);">Differential Diagnosis Feedback</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                     <div>
                         <h4>Your Diagnoses</h4>
@@ -299,12 +354,26 @@
                 <p><strong>Assessment:</strong> {{ case.model_soap.assessment }}</p>
                 <p><strong>Plan:</strong> {{ case.model_soap.plan }}</p>
             </div>
-        </div>
+        </details>
         {% endif %}
+
+        <div style="display: flex; justify-content: space-between; margin-top: 1rem; margin-bottom: 2rem;">
+            <div>
+                <form action="/session/{{ session.id }}/prev" method="post" class="js-session-form" data-enhance="session-action" style="display: inline;">
+                    <button type="submit" class="btn btn-secondary" {% if session.current_stage == 1 %}disabled{% endif %}>Previous Stage</button>
+                </form>
+            </div>
+            <div>
+                <form action="/session/{{ session.id }}/next" method="post" class="js-session-form" data-enhance="session-action" style="display: inline;">
+                    <button type="submit" class="btn" {% if session.current_stage == 5 %}disabled{% endif %}>
+                        {% if session.current_stage == 5 %}Case Completed{% else %}Reveal Next Stage{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <!-- Right Sidebar: Clinical Reasoning Panel -->
-    <div class="workspace-sidebar">
+    <div class="workspace-sidebar" id="reasoningSidebar">
         <div class="info-panel sticky-panel">
             <h3 style="margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; color: var(--primary-color);">Clinical Reasoning Panel</h3>
 
@@ -313,40 +382,11 @@
                 <p style="margin: 0.2rem 0; font-size: 0.95rem;">{{ case.chief_complaint }}</p>
             </div>
 
-            {% macro render_bucket(title, bucket_name, items) %}
-            <div class="workspace-section">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="color: var(--primary-color);">{{ title }}</strong>
-                    {% if items %}
-                    <form action="/session/{{ session.id }}/bucket/{{ bucket_name }}/clear" method="post" style="margin: 0;">
-                        <button type="submit" class="btn-link" style="font-size: 0.75rem;">Clear All</button>
-                    </form>
-                    {% endif %}
-                </div>
-                {% if items %}
-                    <ul class="ddx-list" style="margin-top: 0.5rem;">
-                        {% for item in items %}
-                        <li style="padding: 0.3rem 0.5rem; font-size: 0.85rem;">
-                            <span>{{ item }}</span>
-                            <form action="/session/{{ session.id }}/bucket/{{ bucket_name }}/remove" method="post" style="margin: 0;">
-                                <input type="hidden" name="clue" value="{{ item }}">
-                                <button type="submit" class="btn-remove">&times;</button>
-                            </form>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="empty-list-msg" style="margin-top: 0.2rem;">Click action buttons to add items here.</p>
-                {% endif %}
-            </div>
-            {% endmacro %}
-
-            {{ render_bucket('Subjective Clues', 'subjective_clues', session.subjective_clues) }}
-            {{ render_bucket('Objective Clues', 'objective_clues', session.objective_clues) }}
-            {{ render_bucket('Important Clues / Red Flags', 'red_flag_clues', session.red_flag_clues) }}
-            {{ render_bucket('Differential Support', 'assessment_clues', session.assessment_clues) }}
-            {{ render_bucket('Tests to Consider', 'tests_to_consider', session.tests_to_consider) }}
-            {{ render_bucket('Interventions', 'interventions_to_consider', session.interventions_to_consider) }}
+            {{ render_bucket('Subjective Clues', 'subjective_clues', session.subjective_clues, flagged_lookup, session.id) }}
+            {{ render_bucket('Objective Clues', 'objective_clues', session.objective_clues, flagged_lookup, session.id) }}
+            {{ render_bucket('Differential Support', 'assessment_clues', session.assessment_clues, flagged_lookup, session.id) }}
+            {{ render_bucket('Tests to Consider', 'tests_to_consider', session.tests_to_consider, flagged_lookup, session.id) }}
+            {{ render_bucket('Interventions', 'interventions_to_consider', session.interventions_to_consider, flagged_lookup, session.id) }}
 
             <div class="workspace-section">
                 <strong style="color: var(--primary-color);">Your Differential Diagnosis</strong>
@@ -357,7 +397,7 @@
                         <strong style="display: block; margin-bottom: 0.3rem; font-size: 0.85em; color: var(--secondary-color);">Suggestions:</strong>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.3rem;">
                             {% for suggestion in suggestions %}
-                                <form action="/session/{{ session.id }}/ddx/add" method="post" style="margin: 0;">
+                                <form action="/session/{{ session.id }}/ddx/add" method="post" class="js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="margin: 0;">
                                     <input type="hidden" name="diagnosis" value="{{ suggestion }}">
                                     <button type="submit" class="suggestion-pill" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">+ {{ suggestion }}</button>
                                 </form>
@@ -366,7 +406,7 @@
                     </div>
                     {% endif %}
 
-                    <form action="/session/{{ session.id }}/ddx/add" method="post" class="ddx-form" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <form action="/session/{{ session.id }}/ddx/add" method="post" class="ddx-form js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
                         <input type="text" name="diagnosis" placeholder="e.g., Stable angina" required style="flex: 1; padding: 0.3rem; font-size: 0.85rem; border-radius: 4px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color);">
                         <button type="submit" class="btn" style="padding: 0.3rem 0.6rem;">+</button>
                     </form>
@@ -374,9 +414,9 @@
                     {% if session.user_differential_diagnosis %}
                     <ul class="ddx-list">
                         {% for dx in session.user_differential_diagnosis %}
-                        <li style="padding: 0.3rem 0.5rem; font-size: 0.85rem;">
+                        <li style="padding: 0.3rem 0.5rem; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
                             <span class="glossary-term" onclick="showGlossary('{{ dx }}')">{{ dx }}</span>
-                            <form action="/session/{{ session.id }}/ddx/remove" method="post" style="margin: 0;">
+                            <form action="/session/{{ session.id }}/ddx/remove" method="post" class="js-session-form" data-enhance="session-action" data-swap="#caseMainColumn,#reasoningSidebar" style="margin: 0;">
                                 <input type="hidden" name="diagnosis" value="{{ dx }}">
                                 <button type="submit" class="btn-remove">&times;</button>
                             </form>
@@ -404,24 +444,13 @@
                     <p class="disabled-text">Editing disabled during review.</p>
                 {% endif %}
             </div>
+
+            <div style="margin-top: 2rem; border-top: 1px solid var(--card-border); padding-top: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--secondary-color); cursor: pointer;">
+                    <input type="checkbox" id="autoCollapseToggle"> Auto-collapse previous stages
+                </label>
+            </div>
         </div>
-    </div>
-
-</div>
-
-<!-- Progression Controls -->
-<div style="display: flex; justify-content: space-between; margin-top: 1rem; margin-bottom: 2rem;">
-    <div>
-        <form action="/session/{{ session.id }}/prev" method="post" style="display: inline;">
-            <button type="submit" class="btn btn-secondary" {% if session.current_stage == 1 %}disabled{% endif %}>Previous Stage</button>
-        </form>
-    </div>
-    <div>
-        <form action="/session/{{ session.id }}/next" method="post" style="display: inline;">
-            <button type="submit" class="btn" {% if session.current_stage == 5 %}disabled{% endif %}>
-                {% if session.current_stage == 5 %}Case Completed{% else %}Reveal Next Stage{% endif %}
-            </button>
-        </form>
     </div>
 </div>
 {% endblock %}
